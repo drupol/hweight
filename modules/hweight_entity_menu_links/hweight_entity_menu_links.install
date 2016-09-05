@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Implements hook_schema_alter().
+ */
+function hweight_entity_menu_links_schema_alter(&$schema) {
+  $schema['menu_links_revision']['fields']['hweight'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'The weight of this menu link in the hierarchical tree. Added by the Hierarchy Weight Entity Menu Links module.',
+  );
+}
+
+/**
+ * Implements hook_install().
+ */
+function hweight_entity_menu_links_install() {
+  $schema = array();
+  hweight_entity_menu_links_schema_alter($schema);
+
+  $field = 'hweight';
+  if (!db_field_exists('menu_links_revision', $field)) {
+    db_add_field('menu_links_revision', $field, $schema['menu_links_revision']['fields'][$field]);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function hweight_entity_menu_links_uninstall() {
+  db_drop_field('menu_links_revision', 'hweight');
+}

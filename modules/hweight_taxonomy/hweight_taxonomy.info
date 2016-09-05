@@ -1,0 +1,5 @@
+name = Hierarchy weight for Taxonomy
+description = Integration module with the core Taxonomy module.
+core = 7.x
+dependencies[] = hweight
+dependencies[] = taxonomy

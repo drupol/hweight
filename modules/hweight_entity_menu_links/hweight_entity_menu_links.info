@@ -1,0 +1,6 @@
+name = Hierarchy weight for Entity Menu Links
+description = Integration module for Entity Menu Links mdule.
+core = 7.x
+dependencies[] = hweight:hweight_menu
+dependencies[] = menu
+dependencies[] = entity_menu_links

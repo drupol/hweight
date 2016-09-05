@@ -1,0 +1,4 @@
+name = Base Hierarchy Weight
+description = Base Module for Hierarchy Weight submodules.
+core = 7.x
+

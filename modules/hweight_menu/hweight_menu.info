@@ -1,0 +1,5 @@
+name = Hierarchy Weight Menu
+description = Integration module with the core Menu module.
+core = 7.x
+dependencies[] = hweight
+dependencies[] = menu

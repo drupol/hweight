@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Implements hook_cron().
+ */
+function hweight_menu_cron() {
+  foreach(menu_get_menus() as $menu) {
+    $menu_tree = menu_tree_all_data($menu);
+    $menu_flatten = array();
+    _hweight_menu_flatten_menu($menu_tree, $menu_flatten);
+
+    foreach(array_values($menu_flatten) as $index => $menu_link) {
+      db_update('menu_links')
+        ->fields(array('hweight' => $index))
+        ->condition('mlid', $menu_link['mlid'], '=')
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Helper function. Flatten a menu tree into a single flat array keyed by mlid.
+ */
+function _hweight_menu_flatten_menu($tree, &$flat) {
+  foreach ($tree as $data) {
+    if (!$data['link']['hidden']) {
+      $flat[$data['link']['mlid']] = $data['link'];
+      if ($data['below']) {
+        _hweight_menu_flatten_menu($data['below'], $flat);
+      }
+    }
+  }
+}

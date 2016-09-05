@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * Implements hook_views_api().
+ */
+function hweight_taxonomy_views_api() {
+  return array('api' => 3);
+}
+
+/**
+ * Implements hook_formid_alter().
+ */
+function hweight_taxonomy_form_taxonomy_overview_terms_alter(&$form, $form_state) {
+  $form['#submit'][] = 'hweight_taxonomy_submit';
+}
+
+/**
+ * Custom submit handler that saves the hierarchical weight.
+ */
+function hweight_taxonomy_submit($form, &$form_state) {
+  $page = isset($_GET['page']) ? $_GET['page'] : 0;
+  $offset = $form['#page_increment'];
+  $currentoffset = $offset * $page;
+  foreach (array_values($form_state['input']) as $hweight => $term) {
+    if (is_array($term)) {
+      $hdepth = count(taxonomy_get_parents_all($term['tid'])) - 1;
+      hweight_taxonomy_update($term['tid'], $hweight + $currentoffset, $hdepth);
+    }
+  }
+}
+
+/**
+ * Implements hook_taxonomy_term_insert().
+ */
+function hweight_taxonomy_taxonomy_term_insert($term) {
+  foreach (taxonomy_get_tree($term->vid) as $hweight => $term) {
+    $hdepth = count(taxonomy_get_parents_all($term->tid)) - 1;
+    hweight_taxonomy_update($term->tid, $hweight, $hdepth);
+  }
+}
+
+/**
+ * API function, set the hierarchical weight of a term.
+ *
+ * @param int $tid
+ *   The Term ID
+ * @param int $hweight
+ *   The term weight
+ * @param int $hdepth
+ *   The term depth
+ */
+function hweight_taxonomy_update($tid, $hweight, $hdepth) {
+  if (!is_numeric($tid) || !is_numeric($hweight) || !is_int($hdepth)) {
+    return;
+  }
+
+  db_update('taxonomy_term_data')
+    ->fields(array('hweight' => $hweight, 'hdepth' => $hdepth))
+    ->condition('tid', $tid, '=')
+    ->execute();
+}

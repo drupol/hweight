@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Implements hook_schema_alter().
+ */
+function hweight_taxonomy_schema_alter(&$schema) {
+  $schema['taxonomy_term_data']['fields']['hweight'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'The weight of this term in the hierarchical tree. Added by the Views Term Hierarchy Weight Field module.',
+  );
+  $schema['taxonomy_term_data']['fields']['hdepth'] = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'The depth of this term in the hierarchical tree. Added by the Views Term Hierarchy Weight Field module.',
+  );
+}
+
+/**
+ * Implements hook_install().
+ */
+function hweight_taxonomy_install() {
+  $vocabularies = taxonomy_get_vocabularies();
+  foreach ($vocabularies as $vid => $vocabulary) {
+    foreach (taxonomy_get_tree($vid) as $hweight => $term) {
+      $hdepth = count(taxonomy_get_parents_all($term->tid)) - 1;
+      hweight_taxonomy_update($term->tid, $hweight, $hdepth);
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function hweight_uninstall() {
+  foreach(array('hweight', 'hdepth') as $field) {
+    db_drop_field('taxonomy_term_data', $field);
+  }
+}
